@@ -28,6 +28,7 @@ Current demo UI:
 │   ├── audio/              # Audio resources
 │   ├── fonts/              # TTF fonts loaded through FreeType
 │   └── images/             # Image resources
+├── screenshot/             # Simulator screenshots for supported desktop platforms
 ├── src/
 │   ├── app/                # Application lifecycle, asset loading, screen management
 │   ├── config/             # LVGL config headers for desktop and device builds
@@ -81,6 +82,12 @@ Asset lookup order:
 ## Desktop Builds
 
 Desktop builds are intended for fast UI development and use SDL as the LVGL display/input backend.
+
+### Simulator Preview
+
+| macOS simulator | Debian simulator | Windows simulator |
+| --- | --- | --- |
+| ![macOS simulator screenshot](screenshot/darwin_screenshot.png) | ![Debian simulator screenshot](screenshot/linux_screenshot.png) | ![Windows simulator screenshot](screenshot/win_screenshot.png) |
 
 Current dependencies info:
 
