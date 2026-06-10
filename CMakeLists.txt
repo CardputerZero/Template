@@ -30,15 +30,6 @@ set(CM0_ALLOW_FETCH_DEPS ON CACHE BOOL "Allow downloading missing CM0 BSP/depend
 # Used for IDE IntelliSense
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile_commands.json" FORCE)
 
-# Cross compile envs
-# These are used for cross builds
-if(NOT USE_DESKTOP AND NOT CMAKE_TOOLCHAIN_FILE AND NOT CMAKE_CROSSCOMPILING)
-    set(CMAKE_SYSTEM_NAME Linux)
-    set(CMAKE_SYSTEM_PROCESSOR aarch64)
-    set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc CACHE FILEPATH "aarch64 C compiler")
-    set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++ CACHE FILEPATH "aarch64 C++ compiler")
-endif()
-
 
 include(FetchContent)
 
@@ -78,65 +69,40 @@ if(USE_DESKTOP)
     # =========================
     # PNG
     # =========================
-    find_package(PNG CONFIG QUIET)
-    if(NOT TARGET PNG::PNG)
-        find_package(PNG REQUIRED)
-    endif()
+    find_package(PNG REQUIRED)
 
     # =========================
-    # JPEG
+    # JPEG (platform abstraction handled by package manager)
     # =========================
-    if(WIN32)
-        find_package(libjpeg-turbo CONFIG QUIET)
-        if(TARGET libjpeg-turbo::libjpeg-turbo)
-            set(JPEG_TARGET libjpeg-turbo::libjpeg-turbo)
-        endif()
+    find_package(JPEG REQUIRED)
+
+    if(TARGET libjpeg-turbo::libjpeg-turbo)
+        set(JPEG_TARGET libjpeg-turbo::libjpeg-turbo)
+    elseif(TARGET JPEG::JPEG)
+        set(JPEG_TARGET JPEG::JPEG)
     else()
-        find_package(JPEG CONFIG QUIET)
-        if(NOT TARGET JPEG::JPEG)
-            find_package(JPEG REQUIRED)
-        endif()
-        if(TARGET JPEG::JPEG)
-            set(JPEG_TARGET JPEG::JPEG)
-        endif()
+        message(FATAL_ERROR "No JPEG provider found")
     endif()
 
     # =========================
     # Freetype
     # =========================
-    find_package(Freetype CONFIG QUIET)
-    if(NOT TARGET Freetype::Freetype)
-        find_package(Freetype REQUIRED)
-    endif()
 
+    find_package(Freetype REQUIRED)
     # =========================
     # SDL2
     # =========================
-    find_package(SDL2 CONFIG QUIET)
-    if(TARGET SDL2::SDL2)
-        set(SDL2_TARGET SDL2::SDL2)
-    elseif(TARGET SDL2::SDL2-static)
-        set(SDL2_TARGET SDL2::SDL2-static)
-    else()
-        find_package(SDL2 REQUIRED)
-        # fallback legacy variables
-        if(DEFINED SDL2_LIBRARIES)
-            set(SDL2_TARGET "")
-        endif()
-    endif()
+    find_package(SDL2 CONFIG REQUIRED)
 
     # =========================
     # fmt
     # =========================
     find_package(fmt CONFIG REQUIRED)
-    
+
     # =========================
     # ZLIB
     # =========================
-    find_package(ZLIB CONFIG QUIET)
-    if(NOT TARGET ZLIB::ZLIB)
-        find_package(ZLIB REQUIRED)
-    endif()
+    find_package(ZLIB REQUIRED)
 
     # =========================
     # Link safely
@@ -146,8 +112,8 @@ if(USE_DESKTOP)
         PNG::PNG
         ${JPEG_TARGET}
         Freetype::Freetype
-        ${SDL2_TARGET}
-    )    
+        SDL2::SDL2
+    )
 
     foreach(dep IN LISTS LVGL_DESKTOP_DEPS)
         if(TARGET ${dep})

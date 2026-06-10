@@ -235,109 +235,76 @@ Install vcpkg:
 ```powershell
 git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
 C:\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+```
+
+Configure environmental variables for current terminal:
+
+```
 $env:VCPKG_ROOT="C:\vcpkg"
 $env:PATH="$env:VCPKG_ROOT;$env:PATH"
 ```
 
-Install dependencies from the project root:
+> [!TIP]
+> Change `VCPKG_ROOT` to your vcpkg installation directory if it is located elsewhere.
+>
+> These environment variables are **session-scoped**, meaning they only apply to the current terminal session.
+> Once the terminal is closed, the variables will be lost and need to be set again in a new session.
+> If you want to a persist environment variable
+> ```powershell
+> setx VCPKG_ROOT "C:\vcpkg"
+> ```
 
-```powershell
-vcpkg install --triplet x64-windows
-```
-
-For MinGW-w64, use:
-
-```powershell
-vcpkg install --triplet x64-mingw-dynamic
-```
-
-Create **`CMakeUserPresets.json`** for your local vcpkg path.
-
-> [!NOTE]
-> Change the `"VCPKG_ROOT"` to your vcpkg install directory
-> if you previously cloned and installed to a different location
-
-MSVC example:
-
-```json
-{
-  "version": 10,
-  "configurePresets": [
-    {
-      "name": "win32-user",
-      "inherits": "win32-msvc",
-      "environment": {
-        "VCPKG_ROOT": "C:/vcpkg"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "win32-user-dbg",
-      "configurePreset": "win32-user",
-      "configuration": "Debug"
-    },
-    {
-      "name": "win32-user-rel",
-      "configurePreset": "win32-user",
-      "configuration": "Release"
-    }
-  ]
-}
-```
-
-MinGW-w64 example:
-
-```json
-{
-  "version": 10,
-  "configurePresets": [
-    {
-      "name": "win32-user-mingw64",
-      "inherits": "win32-mingw64",
-      "environment": {
-        "VCPKG_ROOT": "C:/vcpkg"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "win32-user-mingw64-dbg",
-      "configurePreset": "win32-user-mingw64",
-      "configuration": "Debug"
-    },
-    {
-      "name": "win32-user-mingw64-rel",
-      "configurePreset": "win32-user-mingw64",
-      "configuration": "Release"
-    }
-  ]
-}
-```
 
 Configure and build with MSVC:
 
+> [!IMPORTANT]
+> These steps require launching CMake from a **Developer Command Prompt** or **Developer PowerShell** provided by Visual Studio.
+>
+> This ensures that the MSVC environment (compiler, linker, and Windows SDK paths) is properly initialized.
+>
+> Without this environment setup, CMake may fail to detect or correctly configure the MSVC toolchain.
+
 ```powershell
-cmake --preset win32-user
-cmake --build --preset win32-user-dbg
-.\build\win32-user\Debug\template_app.exe
+cmake --preset win32-msvc
+cmake --build --preset win32-msvc-dbg
+.\build\msvc\Debug\template_app.exe
 
 # alternatively for release build
-# cmake --build --preset win32-user-rel
-# .\build\win32-user\Release\template_app.exe
+# cmake --build --preset win32-msvc-rel
+# .\build\msvc\Release\template_app.exe
 ```
 
 Configure and build with MinGW-w64:
 
+> [!IMPORTANT]
+> These steps require a properly configured MinGW-w64 toolchain in your system PATH.
+>
+> Please ensure the following compilers are available in the current terminal session:
+> - gcc
+> - g++
+> - ld
+> - ar
+>
+> You can verify the setup by running:
+> ```powershell
+> gcc --version
+> g++ --version
+> ```
+>
+> If these commands are not recognized, you must add MinGW-w64 `bin` directory to your PATH before configuring CMake.
+
 ```powershell
-cmake --preset win32-user-mingw64
-cmake --build --preset win32-user-mingw64-dbg
-.\build\win32-user-mingw64\Debug\template_app.exe
+cmake --preset win32-mingw64
+cmake --build --preset win32-mingw64-dbg
+.\build\mingw64\Debug\template_app.exe
 
 # alternatively for release build
-# cmake --build --preset win32-user-mingw64-rel
-#.\build\win32-user-mingw64\Release\template_app.exe
+# cmake --build --preset win32-mingw64-rel
+#.\build\mingw64\Release\template_app.exe
 ```
+> [!NOTE]
+> `VCPKG` will handle the dependencies during CMake configuration process automatically, 
+> this may take several minutes depend on you network connection.
 
 ## CardputerZero Cross Build
 
@@ -467,7 +434,13 @@ Build and package:
 ```shell
 cmake --preset cp0-cross
 cmake --build --preset cp0-cross-rel
-cpack -G DEB -C Release --config build/cp0-cross/CPackConfig.cmake
+cpack --preset cp0-cross-deb
+```
+
+Or run the full configure, release build, and package flow with one workflow preset:
+
+```shell
+cmake --workflow --preset cp0-cross-package
 ```
 
 > [!NOTE]
