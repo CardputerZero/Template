@@ -32,7 +32,7 @@
                 "CMAKE_C_COMPILER": "/usr/bin/gcc",
                 "CMAKE_CXX_COMPILER": "/usr/bin/g++",
                 "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache",
+                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache/cp0-deps",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/${presetName}/install",
                 "USE_DESKTOP": "OFF",
                 "APP_USE_DRM": "OFF"
@@ -47,7 +47,7 @@
             "cacheVariables": {
                 "CMAKE_OSX_ARCHITECTURES": "arm64",
                 "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache",
+                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache/darwin-arm64-deps",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/${presetName}/install",
                 "CMAKE_C_COMPILER": "/usr/bin/clang",
                 "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
@@ -64,7 +64,8 @@
                 "darwin-arm64"
             ],
             "cacheVariables": {
-                "CMAKE_OSX_ARCHITECTURES": "x86_64"
+                "CMAKE_OSX_ARCHITECTURES": "x86_64",
+                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache/darwin-x86_64-deps"
             }
         },
         {
@@ -75,7 +76,7 @@
             "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache",
+                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache/linux-x86_64-deps",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/${presetName}/install",
                 "CMAKE_C_COMPILER": "/usr/bin/gcc",
                 "CMAKE_CXX_COMPILER": "/usr/bin/g++",
@@ -93,7 +94,7 @@
                 "CMAKE_CXX_COMPILER": "cl",
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
                 "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
-                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache",
+                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache/win32-msvc-deps",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/msvc/install",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "USE_DESKTOP": "ON"
@@ -107,7 +108,7 @@
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build/mingw64",
             "cacheVariables": {
-                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache",
+                "FETCHCONTENT_BASE_DIR": "${sourceDir}/.cache/win32-mingw64-deps",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic",
                 "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
