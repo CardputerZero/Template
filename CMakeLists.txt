@@ -362,6 +362,14 @@ else()
             APP_USE_DRM=$<BOOL:${APP_USE_DRM}>
     )
 
+    # fix: issue of compiling lvgl on gcc >= 15.0
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        # GCC version is available in CMAKE_C_COMPILER_VERSION
+        if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
+            target_compile_options(lvgl PRIVATE -Wno-stringop-overflow)
+        endif()
+    endif()
+
     target_include_directories(lvgl
         PUBLIC
             ${LVGL_INCLUDE_DIR}

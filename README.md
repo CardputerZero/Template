@@ -167,6 +167,7 @@ brew install \
   fmt \
   sdl2 \
   freetype \
+  dpkg \
   zlib
 ```
 
@@ -327,6 +328,7 @@ brew install aarch64-unknown-linux-gnu
 
 > [!NOTE]
 > On Windows, it's recommended to use WSL for cross build
+> or you can download [cross compile tools](https://sysprogs.com/getfile/2542/raspberry64-gcc14.2.0.exe) and configure the `PATH` yourself
 
 Configure:
 
