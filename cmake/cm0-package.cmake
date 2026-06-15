@@ -44,9 +44,14 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/${APP_NAME}/images"
     PATTERN ".DS_Store" EXCLUDE
 )
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/images/"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/APPLaunch/share/images"
+    FILES_MATCHING
+    PATTERN "template*.png"
+)
 
 install(FILES "${APP_GENERATED_DIR}/${PROJECT_NAME}.desktop"
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/APPLaunch/applications"
 )
 
 if(APP_INSTALL_SYSTEMD_SERVICE)

@@ -67,8 +67,8 @@ void NavBar::build() {
 }
 
 void NavBar::create_icon_buttons() {
-    const auto light_color = lv_color_hex(0x1f2328);
-    const auto dark_color = lv_color_hex(0xf4f4f5);
+    const auto light_color = view::palette(false).text;
+    const auto dark_color = view::palette(true).text;
     icon_font_ = assets_.load_font("Phosphor-Fill.ttf", 26);
 
     for (size_t i = 0; i < icon_buttons_.size(); ++i) {

@@ -7,6 +7,8 @@
 
 #include "icon_button.h"
 
+#include "theme.h"
+
 namespace view::widgets {
 
 IconButton::IconButton(lv_obj_t* parent,
@@ -106,7 +108,7 @@ void IconButton::apply_theme(bool dark_mode) {
 
     lv_obj_set_style_bg_opa(core_obj_, LV_OPA_TRANSP, 0);
     if (!enabled_) {
-        lv_obj_set_style_text_color(label_, dark_mode ? lv_color_hex(0x6f7782) : lv_color_hex(0xa8adb3), 0);
+        lv_obj_set_style_text_color(label_, view::palette(dark_mode).text_disabled, 0);
         return;
     }
 

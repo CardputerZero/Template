@@ -6,27 +6,35 @@
 
 #include "theme.h"
 
+#include "ui_const.h"
+
 namespace view {
 
 ThemePalette palette(bool dark_mode) {
     if (dark_mode) {
         return {
-            lv_color_hex(0x101214),
-            lv_color_hex(0x15181c),
-            lv_color_hex(0x181b1f),
-            lv_color_hex(0x2a2f35),
-            lv_color_hex(0x30363d),
-            lv_color_hex(0xf4f4f5),
+            lv_color_hex(color::dark::kBody),
+            lv_color_hex(color::dark::kCard),
+            lv_color_hex(color::dark::kAction),
+            lv_color_hex(color::dark::kButton),
+            lv_color_hex(color::dark::kBorder),
+            lv_color_hex(color::dark::kTextPrimary),
+            lv_color_hex(color::dark::kTextDisabled),
+            lv_color_hex(color::dark::kPrimary),
+            lv_color_hex(color::dark::kInfo),
         };
     }
 
     return {
-        lv_color_hex(0xf8f9fa),
-        lv_color_hex(0xffffff),
-        lv_color_hex(0xf0f0f0),
-        lv_color_hex(0xe7e7e7),
-        lv_color_hex(0xd0d7de),
-        lv_color_hex(0x1f2328),
+        lv_color_hex(color::light::kBody),
+        lv_color_hex(color::light::kCard),
+        lv_color_hex(color::light::kAction),
+        lv_color_hex(color::light::kButton),
+        lv_color_hex(color::light::kBorder),
+        lv_color_hex(color::light::kTextPrimary),
+        lv_color_hex(color::light::kTextDisabled),
+        lv_color_hex(color::light::kPrimary),
+        lv_color_hex(color::light::kInfo),
     };
 }
 
@@ -35,11 +43,8 @@ void apply_lvgl_theme(lv_display_t* display, bool dark_mode) {
         return;
     }
 
-    lv_theme_t* theme = lv_theme_default_init(display,
-                                              lv_color_hex(0x3a7afe),
-                                              lv_color_hex(0x5f6b7a),
-                                              dark_mode,
-                                              LV_FONT_DEFAULT);
+    const auto colors = palette(dark_mode);
+    lv_theme_t* theme = lv_theme_default_init(display, colors.primary, colors.info, dark_mode, LV_FONT_DEFAULT);
     lv_display_set_theme(display, theme);
 }
 

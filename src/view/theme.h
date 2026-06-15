@@ -22,6 +22,9 @@ struct ThemePalette {
     lv_color_t button;
     lv_color_t border;
     lv_color_t text;
+    lv_color_t text_disabled;
+    lv_color_t primary;
+    lv_color_t info;
 };
 
 ThemePalette palette(bool dark_mode);

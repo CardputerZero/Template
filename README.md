@@ -122,7 +122,7 @@ sudo apt install -y \
 ```
 
 > [!NOTE]
-> Minimal CMake version is 3.23.0, for Ubuntu user you can install latest cmake via `snap`
+> Minimal CMake version is 3.31.0 (in coordinate with Debian 13 trixie), for Ubuntu user you can install latest cmake via `snap`
 > and run following cmake command with `/snap/bin/cmake`.
 
 
@@ -427,7 +427,8 @@ Package layout:
 | --- | --- |
 | `/usr/bin/template_app` | Application executable. |
 | `/usr/share/template_app/` | Runtime assets: fonts, images, audio. |
-| `/usr/share/applications/template_app.desktop` | Desktop/application launcher entry. |
+| `/usr/share/APPLaunch/applications/template_app.desktop` | APPLaunch launcher entry. |
+| `/usr/share/APPLaunch/share/images/template*.png` | APPLaunch launcher icons/fallbacks. |
 | `/usr/lib/systemd/system/template_app.service` | Optional systemd service for embedded autostart. |
 | `/usr/share/doc/template_app/` | README and third-party asset license notes. |
 
