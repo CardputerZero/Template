@@ -344,6 +344,20 @@ cmake --build --preset cp0-cross-dbg
 # cmake --build --preset cp0-cross-rel
 ```
 
+Deploy the release package to your device after filling in your device user and IP:
+
+```shell
+REMOTE_USER=<user> REMOTE_HOST=<device-ip> ./deploy.sh
+```
+
+By default, the debian package is copied to '$HOME' folder, normally it's under '/home/<user>'.
+
+On your device, install the copied package with `apt` and replace the package file name with the one you copied:
+
+```shell
+sudo apt install --no-install-recommends ./TemplateApp_0.0.1_m5stack1_arm64.deb
+```
+
 If your BSP sysroot is in another location, pass it explicitly:
 
 ```shell

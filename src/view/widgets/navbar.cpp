@@ -69,19 +69,20 @@ void NavBar::build() {
 void NavBar::create_icon_buttons() {
     const auto light_color = view::palette(false).text;
     const auto dark_color = view::palette(true).text;
-    icon_font_ = assets_.load_font("Phosphor-Fill.ttf", 26);
+    icon_font_ = assets_.load_font("Phosphor-Fill.ttf", 22);
 
     for (size_t i = 0; i < icon_buttons_.size(); ++i) {
         icon_buttons_[i] = std::make_unique<IconButton>(core_obj_,
                                                         view_model_,
                                                         32,
-                                                        22,
+                                                        24,
                                                         "",
                                                         icon_font_ ? icon_font_ : &lv_font_montserrat_14,
                                                         light_color,
                                                         dark_color,
                                                         nullptr,
-                                                        &view_model_);
+                                                        &view_model_,
+                                                        true);
         icon_buttons_[i]->build();
         lv_obj_set_style_translate_x(icon_buttons_[i]->root(), kNavButtonXOffsets[i], 0);
         platform::register_nav_button(i, icon_buttons_[i]->root());

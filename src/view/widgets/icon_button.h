@@ -27,7 +27,8 @@ public:
                lv_color_t light_color,
                lv_color_t dark_color,
                lv_event_cb_t click_cb = nullptr,
-               void* user_data = nullptr);
+               void* user_data = nullptr,
+               bool show_indicator = false);
 
     void build() override;
     void set_text(const char* text);
@@ -38,6 +39,7 @@ private:
     static void theme_observer_cb(lv_observer_t* observer, lv_subject_t* subject);
 
     void apply_theme(bool dark_mode);
+    void apply_indicator_style();
 
     viewmodel::BaseViewModel& view_model_;
     int32_t width_;
@@ -48,7 +50,9 @@ private:
     lv_color_t dark_color_;
     lv_event_cb_t click_cb_;
     void* user_data_;
+    bool show_indicator_{false};
     lv_obj_t* label_{nullptr};
+    lv_obj_t* indicator_{nullptr};
     bool enabled_{true};
 
 };
