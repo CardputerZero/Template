@@ -350,7 +350,7 @@ Deploy the release package to your device after filling in your device user and 
 REMOTE_USER=<user> REMOTE_HOST=<device-ip> ./deploy.sh
 ```
 
-By default, the debian package is copied to '$HOME' folder, normally it's under '/home/<user>'.
+By default, the debian package is copied to '$HOME' folder, normally it's under '/home/\<user\>'.
 
 On your device, install the copied package with `apt` and replace the package file name with the one you copied:
 
@@ -358,17 +358,6 @@ On your device, install the copied package with `apt` and replace the package fi
 sudo apt install --no-install-recommends ./TemplateApp_0.0.1_m5stack1_arm64.deb
 ```
 
-If your BSP sysroot is in another location, pass it explicitly:
-
-```shell
-cmake --preset cp0-cross -DCM0_SDK_ROOT=/path/to/sdk_bsp-src
-```
-
-To force an offline configure and fail when the BSP is missing, use:
-
-```shell
-cmake --preset cp0-cross -DCM0_ALLOW_FETCH_DEPS=OFF
-```
 
 ## Development Guide
 
