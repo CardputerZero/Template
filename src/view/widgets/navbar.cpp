@@ -20,7 +20,18 @@ struct IconSpec {
     lv_event_cb_t click_cb;
 };
 
-constexpr std::array<int32_t, 5> kNavButtonXOffsets = {36, 17, 2, -17, -36};
+constexpr std::array<int32_t, 5> kNavButtonXOffsets = {30, 17, 2, -15, -30};
+
+struct ShortcutSpec {
+    const char* key;
+    const char* action;
+};
+
+constexpr std::array<ShortcutSpec, 3> kButterShortcuts = {{
+    {"ESC", "Back"},
+    {"Z/Left", "Less"},
+    {"C/Right", "More"},
+}};
 
 } // namespace
 
@@ -61,9 +72,50 @@ void NavBar::build() {
     reactive::bind_theme(core_obj_, view_model_.dark_mode_subject(), reactive::ThemeRole::Bar);
 
     create_icon_buttons();
+    create_shortcut_hints();
     page_observer_ = reactive::observe_obj(core_obj_, view_model_.current_page_subject(), update_icons_cb, this);
     theme_observer_ = reactive::observe_obj(core_obj_, view_model_.dark_mode_subject(), update_icons_cb, this);
     update_icon_buttons();
+}
+
+void NavBar::create_shortcut_hints() {
+    shortcut_bar_ = lv_obj_create(core_obj_);
+    lv_obj_remove_style_all(shortcut_bar_);
+    lv_obj_set_size(shortcut_bar_, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_flex_flow(shortcut_bar_, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(shortcut_bar_, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_hor(shortcut_bar_, 10, 0);
+    lv_obj_clear_flag(shortcut_bar_, LV_OBJ_FLAG_SCROLLABLE);
+
+    const lv_font_t* key_font = assets_.load_font("inter-semibold.ttf", 14);
+    if (!key_font) {
+        key_font = &lv_font_montserrat_14;
+    }
+    const lv_font_t* text_font = assets_.load_font("inter-regular.ttf", 14);
+    if (!text_font) {
+        text_font = &lv_font_montserrat_14;
+    }
+
+    for (size_t index = 0; index < kButterShortcuts.size(); ++index) {
+        const auto& shortcut = kButterShortcuts[index];
+        auto* item = lv_obj_create(shortcut_bar_);
+        lv_obj_remove_style_all(item);
+        lv_obj_set_size(item, LV_SIZE_CONTENT, LV_PCT(100));
+        lv_obj_set_flex_flow(item, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(item, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_column(item, 3, 0);
+        lv_obj_clear_flag(item, LV_OBJ_FLAG_SCROLLABLE);
+
+        auto* key = lv_label_create(item);
+        lv_label_set_text(key, shortcut.key);
+        lv_obj_set_style_text_font(key, key_font, 0);
+        shortcut_key_labels_[index] = key;
+
+        auto* label = lv_label_create(item);
+        lv_label_set_text(label, shortcut.action);
+        lv_obj_set_style_text_font(label, text_font, 0);
+        reactive::bind_theme(label, view_model_.dark_mode_subject(), reactive::ThemeRole::Text);
+    }
 }
 
 void NavBar::create_icon_buttons() {
@@ -92,6 +144,7 @@ void NavBar::create_icon_buttons() {
 void NavBar::update_icon_buttons() {
     const bool is_butter_page = view_model_.current_page() == model::AppPage::Butter;
     const bool is_dark_mode = view_model_.is_dark_mode();
+    const auto colors = view::palette(is_dark_mode);
     const char* theme_icon = is_dark_mode ? ICON_SUN : ICON_MOON;
     /* nav bar icons showed on apple screen */
     const std::array<IconSpec, 5> apple_icons = {{
@@ -101,14 +154,29 @@ void NavBar::update_icon_buttons() {
         {ICON_INFO, show_info_cb},
         {ICON_SQUARE_ARROW_RIGHT, toggle_page_cb},
     }};
-    /* nav bar icons showed on butter screen */
+    /* Hidden action targets for the shortcut keys shown on the butter screen. */
     const std::array<IconSpec, 5> butter_icons = {{
-        {ICON_SIGN_OUT, request_quit_cb},
-        {ICON_MINUS, decrement_counter_cb},
-        {theme_icon, toggle_theme_cb},
-        {ICON_PLUS, increment_counter_cb},
-        {ICON_SQUARE_ARROW_LEFT, toggle_page_cb},
+        {"", nullptr},
+        {"", decrement_counter_cb},
+        {"", nullptr},
+        {"", increment_counter_cb},
+        {"", toggle_page_cb},
     }};
+
+    platform::set_nav_shortcut_mode(is_butter_page);
+    for (auto* key_label : shortcut_key_labels_) {
+        if (key_label) {
+            lv_obj_set_style_text_color(key_label, colors.primary, 0);
+        }
+    }
+    if (shortcut_bar_) {
+        if (is_butter_page) {
+            lv_obj_remove_flag(shortcut_bar_, LV_OBJ_FLAG_HIDDEN);
+        }
+        else {
+            lv_obj_add_flag(shortcut_bar_, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
 
     const auto& icons = is_butter_page ? butter_icons : apple_icons;
     for (size_t i = 0; i < icon_buttons_.size(); ++i) {
@@ -119,7 +187,12 @@ void NavBar::update_icon_buttons() {
 
         button->set_text(icons[i].text);
         if (button->root()) {
-            lv_obj_remove_flag(button->root(), LV_OBJ_FLAG_HIDDEN);
+            if (is_butter_page) {
+                lv_obj_add_flag(button->root(), LV_OBJ_FLAG_HIDDEN);
+            }
+            else {
+                lv_obj_remove_flag(button->root(), LV_OBJ_FLAG_HIDDEN);
+            }
             lv_obj_remove_event_cb(button->root(), toggle_theme_cb);
             lv_obj_remove_event_cb(button->root(), toggle_page_cb);
             lv_obj_remove_event_cb(button->root(), toggle_bold_text_cb);
