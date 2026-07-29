@@ -1,7 +1,45 @@
-# CardputerZero Template Project
+<p align="center">
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="./screenshot/app-simulator-dark-darwin.png"
+    />
+    <source
+      media="(prefers-color-scheme: light)"
+      srcset="./screenshot/app-simulator-light-darwin.png"
+    />
+    <img
+      src="./screenshot/app-simulator-light-darwin.png"
+      alt="CardputerZero Template running in the desktop simulator"
+      style="width: 100%; max-width: 630px; height: auto;"
+    />
+  </picture>
+</p>
 
-A simple starter template for building embedded Linux GUI applications with [LVGL](https://lvgl.io/) and CMake.
-It is intended to be used as a clean development baseline: desktop builds use SDL for fast UI preview, while device builds use the Linux/LVGL platform drivers.
+<div align="center">
+    <h1>CardputerZero Application Template</h1>
+</div>
+
+<div align="center">
+  <p>A simple starter template for building embedded Linux GUI applications with LVGL and CMake.</p>
+</div>
+
+<p align="center" style="margin: 20px 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;">
+  <img src="https://img.shields.io/badge/SDL3-173B73?style=flat-square&logo=sdl&logoColor=white" alt="SDL3" />
+  <img src="https://img.shields.io/badge/CMake-064F8C?style=flat-square&logo=cmake&logoColor=white" alt="CMake" />
+  <img src="https://img.shields.io/badge/LVGL-2A9FD6?style=flat-square&logo=lvgl&logoColor=white" alt="LVGL" />
+  <img src="https://img.shields.io/badge/Raspberry%20Pi-A22846?style=flat-square&logo=raspberrypi&logoColor=white" alt="Raspberry Pi" />
+</p>
+
+<p align="center">
+  <a href="https://discord.gg/ysQAWBUE9Q">
+    <img
+      src="https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=flat-square&logo=discord&logoColor=white"
+      alt="Join Discord"
+    />
+  </a>
+</p>
+It is intended to be used as a clean development baseline: desktop builds use an SDL hardware-accelerated compositor for fast UI preview, while device builds use the Linux/LVGL platform drivers.
 
 ## Project Overview
 
@@ -17,7 +55,7 @@ In this example project, we used small MVVM-style structure around LVGL:
 Current demo UI:
 
 - Page 1: Hello World, font weight toggle, LVGL version info, light/dark theme toggle, page navigation.
-- Page 2: Counter page, increment/decrement actions with a non-negative lower bound, light/dark theme toggle, page navigation.
+- Page 2: Counter page, increment/decrement actions, simple page navigation.
 
 ## Repository Layout
 
@@ -50,7 +88,8 @@ Current demo UI:
 
 - `src/app/asset_manager.*`: resolves runtime assets from the optional CMake asset root, source tree `assets/`, and installed `/usr/share/<APP_NAME>/` path.
 - `src/app/screen_namager.cpp`: switches LVGL screens when the current page subject changes.
-- `src/config/lv_conf_desktop.h`: desktop SDL simulator LVGL settings.
+- `src/app/desktop_simulator_frame.*`: owns the desktop SDL window, renderer, high-resolution shell textures, input, and LVGL texture composition.
+- `src/config/lv_conf_desktop.h`: desktop LVGL rendering settings.
 - `src/config/lv_conf_cm0.h`: embedded Linux/CardputerZero LVGL settings.
 - `src/platform/linux_input.*`: Linux evdev keypad support and desktop SDL keyboard routing for nav buttons.
 - `src/reactive/subjects.*`: typed wrappers around LVGL subjects.
@@ -81,13 +120,7 @@ Asset lookup order:
 
 ## Desktop Builds
 
-Desktop builds are intended for fast UI development and use SDL as the LVGL display/input backend.
-
-### Simulator Preview
-
-| macOS simulator | Debian simulator | Windows simulator |
-| --- | --- | --- |
-| ![macOS simulator screenshot](screenshot/darwin_screenshot.png) | ![Debian simulator screenshot](screenshot/linux_screenshot.png) | ![Windows simulator screenshot](screenshot/win_screenshot.png) |
+Desktop builds are intended for fast UI development. LVGL renders at the device-native `320x170` resolution, while SDL composites that texture into a hardware-accelerated, high-DPI simulator window with the full-resolution device shell.
 
 Current dependencies info:
 
@@ -355,7 +388,7 @@ By default, the debian package is copied to '$HOME' folder, normally it's under 
 On your device, install the copied package with `apt` and replace the package file name with the one you copied:
 
 ```shell
-sudo apt install --no-install-recommends ./TemplateApp_0.0.1_m5stack1_arm64.deb
+sudo apt install --no-install-recommends ./TemplateApp_0.1.0_m5stack1_arm64.deb
 ```
 
 
@@ -363,7 +396,7 @@ sudo apt install --no-install-recommends ./TemplateApp_0.0.1_m5stack1_arm64.deb
 
 ### Navigation Keys
 
-The bottom nav bar maps hardware/keyboard keys from left to right:
+The first page bottom nav bar maps hardware/keyboard keys from left to right:
 
 | Key | Nav item |
 | --- | --- |
@@ -373,6 +406,14 @@ The bottom nav bar maps hardware/keyboard keys from left to right:
 | `7` | Fourth icon button |
 | `8` | Fifth icon button |
 | `ESC` | First icon button / quit |
+
+The counter page uses direct keyboard shortcuts:
+
+| Key | Action |
+| --- | --- |
+| `ESC` | Return to the first page |
+| `Left` | Decrease the counter |
+| `Right` | Increase the counter |
 
 ### Adding a Screen
 
@@ -421,7 +462,7 @@ Debian packages are produced with CPack and written to `dist/`. The package file
 Default example:
 
 ```text
-dist/TemplateApp_0.0.1_m5stack1_arm64.deb
+dist/TemplateApp_0.1.0_m5stack1_arm64.deb
 ```
 
 Package layout:

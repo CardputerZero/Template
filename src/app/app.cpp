@@ -13,6 +13,10 @@
 #include "base_viewmodel.h"
 #include "theme.h"
 
+#if USE_DESKTOP
+#include "desktop_simulator_frame.h"
+#endif
+
 #if !USE_DESKTOP
 #if APP_USE_DRM
 #include "src/drivers/display/drm/lv_linux_drm.h"
@@ -43,21 +47,9 @@ void quit_requested_observer(lv_observer_t* observer, lv_subject_t* subject) {
     }
 }
 
-lv_display_t* init_display() {
-#if USE_DESKTOP
-    auto* display = lv_sdl_window_create(view::kScreenWidth, view::kScreenHeight);
-    if (!display) {
-        return nullptr;
-    }
-
-    lv_sdl_window_set_title(display, "Template App");
-    lv_sdl_window_set_resizeable(display, false);
-    lv_sdl_mouse_create();
-    lv_sdl_mousewheel_create();
-    auto* keyboard = lv_sdl_keyboard_create();
-    platform::attach_key_router(keyboard);
-    return display;
-#elif APP_USE_DRM
+#if !USE_DESKTOP
+lv_display_t* init_device_display() {
+#if APP_USE_DRM
     auto* display = lv_linux_drm_create();
     if (!display) {
         return nullptr;
@@ -85,6 +77,7 @@ lv_display_t* init_display() {
     return display;
 #endif
 }
+#endif
 
 } // namespace
 
@@ -94,19 +87,29 @@ int Application::run() {
 
     lv_init();
 
-    auto* display = init_display();
-    if (!display) {
-        LOG_ERROR("failed to initialize display");
-        return 1;
-    }
-
     AssetManager assets;
     for (const auto& root : assets.roots()) {
         LOG_INFO("asset root: {}", root.string());
     }
 
     viewmodel::BaseViewModel view_model;
+
+#if USE_DESKTOP
+    DesktopSimulatorFrame simulator_frame(assets);
+    auto* display = simulator_frame.display();
+#else
+    auto* display = init_device_display();
+#endif
+    if (!display) {
+        LOG_ERROR("failed to initialize display");
+        return 1;
+    }
+
     view::apply_lvgl_theme(display, view_model.is_dark_mode());
+
+#if USE_DESKTOP
+    simulator_frame.bind_dark_mode(view_model.dark_mode_subject());
+#endif
 
     ScreenManager screen_manager(view_model, assets);
     screen_manager.start();
@@ -118,7 +121,11 @@ int Application::run() {
 
     LOG_INFO("LVGL app started at {}x{}", lv_display_get_horizontal_resolution(display),
              lv_display_get_vertical_resolution(display));
-    while (running) {
+    while (running
+#if USE_DESKTOP
+           && simulator_frame.process_events()
+#endif
+    ) {
         lv_timer_handler();
         lv_delay_ms(5);
     }

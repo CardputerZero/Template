@@ -31,11 +31,12 @@ void BaseScreen::init() {
 
     root_ = lv_obj_create(nullptr);
     lv_obj_remove_style_all(root_);
-    lv_obj_set_size(root_, view::kScreenWidth, view::kScreenHeight);
     lv_obj_clear_flag(root_, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_size(root_, view::kScreenWidth, view::kScreenHeight);
     reactive::bind_theme(root_, view_model_.dark_mode_subject(), reactive::ThemeRole::Screen);
 
-    title_bar_ = std::make_unique<view::widgets::TitleBar>(root_, view_model_);
+    title_bar_ = std::make_unique<view::widgets::TitleBar>(root_, view_model_, assets_);
     title_bar_->build();
 
     nav_bar_ = std::make_unique<view::widgets::NavBar>(root_, view_model_, assets_);

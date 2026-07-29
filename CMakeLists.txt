@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.31)
 
-project(template_app VERSION 0.0.1 LANGUAGES C CXX)
+project(template_app VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -589,6 +589,19 @@ target_link_libraries(${PROJECT_NAME}_core
         ${PROJECT_NAME}_viewmodel
         ${PROJECT_NAME}_platform
 )
+
+if(USE_DESKTOP)
+    target_link_libraries(${PROJECT_NAME}_core
+        PRIVATE
+            PNG::PNG
+    )
+    if(TARGET SDL2::SDL2)
+        target_link_libraries(${PROJECT_NAME}_core PRIVATE SDL2::SDL2)
+    else()
+        target_include_directories(${PROJECT_NAME}_core PRIVATE ${SDL2_INCLUDE_DIRS})
+        target_link_libraries(${PROJECT_NAME}_core PRIVATE ${SDL2_LIBRARIES})
+    endif()
+endif()
 
 # ====================================================
 # main

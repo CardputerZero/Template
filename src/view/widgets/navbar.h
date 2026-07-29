@@ -28,6 +28,7 @@ public:
 
 private:
     void create_icon_buttons();
+    void create_shortcut_hints();
     void update_icon_buttons();
 
     static void toggle_theme_cb(lv_event_t* event);
@@ -42,7 +43,9 @@ private:
     viewmodel::BaseViewModel& view_model_;
     app::AssetManager& assets_;
     std::array<std::unique_ptr<IconButton>, 5> icon_buttons_;
+    std::array<lv_obj_t*, 3> shortcut_key_labels_{};
     lv_font_t* icon_font_{nullptr};
+    lv_obj_t* shortcut_bar_{nullptr};
     lv_observer_t* page_observer_{nullptr};
     lv_observer_t* theme_observer_{nullptr};
 };

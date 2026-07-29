@@ -24,8 +24,26 @@ namespace {
 std::array<lv_obj_t*, kNavKeyCount> nav_buttons{};
 uint32_t last_key = 0;
 bool last_key_pressed = false;
+bool nav_shortcut_mode = false;
 
 size_t nav_key_to_index(uint32_t key) {
+    if (nav_shortcut_mode) {
+        switch (key) {
+            case LV_KEY_ESC:
+                return 4;
+            case 'z':
+            case 'Z':
+            case LV_KEY_LEFT:
+                return 1;
+            case 'c':
+            case 'C':
+            case LV_KEY_RIGHT:
+                return 3;
+            default:
+                return kNavKeyCount;
+        }
+    }
+
     switch (key) {
         case '4':
         case LV_KEY_ESC:
@@ -87,6 +105,10 @@ uint32_t map_evdev_key(uint16_t code) {
     switch (code) {
         case KEY_ESC:
             return LV_KEY_ESC;
+        case KEY_LEFT:
+            return LV_KEY_LEFT;
+        case KEY_RIGHT:
+            return LV_KEY_RIGHT;
         case KEY_4:
             return '4';
         case KEY_5:
@@ -113,8 +135,8 @@ bool has_nav_keys(int fd) {
         return (key_bits[code / bits_per_word] & (1UL << (code % bits_per_word))) != 0;
     };
 
-    return has_key(KEY_ESC) || has_key(KEY_4) || has_key(KEY_5) || has_key(KEY_6) ||
-           has_key(KEY_7) || has_key(KEY_8);
+    return has_key(KEY_ESC) || has_key(KEY_LEFT) || has_key(KEY_RIGHT) || has_key(KEY_4) ||
+           has_key(KEY_5) || has_key(KEY_6) || has_key(KEY_7) || has_key(KEY_8);
 }
 
 void evdev_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
@@ -246,6 +268,10 @@ void attach_key_router(lv_indev_t* indev) {
     }
 
     lv_indev_add_event_cb(indev, key_event_cb, LV_EVENT_KEY, nullptr);
+}
+
+void set_nav_shortcut_mode(bool enabled) {
+    nav_shortcut_mode = enabled;
 }
 
 void register_nav_button(size_t index, lv_obj_t* button) {
