@@ -11,7 +11,7 @@
     <img
       src="./screenshot/app-simulator-light-darwin.png"
       alt="CardputerZero Template running in the desktop simulator"
-      style="width: 100%; max-width: 630px; height: auto;"
+      style="width: 100%; max-width: 315px; height: auto;"
     />
   </picture>
 </p>
