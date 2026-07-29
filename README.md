@@ -8,11 +8,11 @@
       media="(prefers-color-scheme: light)"
       srcset="./screenshot/app-simulator-light-darwin.png"
     />
-    <img
-      src="./screenshot/app-simulator-light-darwin.png"
-      alt="CardputerZero Template running in the desktop simulator"
-      style="width: 100%; max-width: 315px; height: auto;"
-    />
+  <img
+    src="./screenshot/app-simulator-light-darwin.png"
+    alt="CardputerZero Template running in the desktop simulator"
+    width="315"
+  />
   </picture>
 </p>
 
