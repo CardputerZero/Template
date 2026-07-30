@@ -26,6 +26,17 @@ uint32_t last_key = 0;
 bool last_key_pressed = false;
 bool nav_shortcut_mode = false;
 
+#if !USE_DESKTOP
+struct EvdevKeypad {
+    int fd{-1};
+    lv_indev_state_t state{LV_INDEV_STATE_RELEASED};
+    uint32_t key{0};
+    bool router_event_pending{false};
+    uint32_t router_key{0};
+    bool router_pressed{false};
+};
+#endif
+
 size_t nav_key_to_index(uint32_t key) {
     if (nav_shortcut_mode) {
         switch (key) {
@@ -83,6 +94,28 @@ void key_event_cb(lv_event_t* event) {
         return;
     }
 
+#if !USE_DESKTOP
+    auto* keypad = static_cast<EvdevKeypad*>(lv_indev_get_driver_data(indev));
+    if (keypad) {
+        // LVGL emits LV_EVENT_KEY on every poll, even when evdev had no new event.
+        if (!keypad->router_event_pending) {
+            return;
+        }
+
+        keypad->router_event_pending = false;
+        const auto key = keypad->router_key;
+        const bool pressed = keypad->router_pressed;
+
+        if (pressed && (!last_key_pressed || last_key != key)) {
+            dispatch_nav_key(key);
+        }
+
+        last_key = key;
+        last_key_pressed = pressed;
+        return;
+    }
+#endif
+
     const auto key = lv_indev_get_key(indev);
     const bool pressed = lv_indev_get_state(indev) == LV_INDEV_STATE_PRESSED;
 
@@ -95,12 +128,6 @@ void key_event_cb(lv_event_t* event) {
 }
 
 #if !USE_DESKTOP
-struct EvdevKeypad {
-    int fd{-1};
-    lv_indev_state_t state{LV_INDEV_STATE_RELEASED};
-    uint32_t key{0};
-};
-
 uint32_t map_evdev_key(uint16_t code) {
     switch (code) {
         case KEY_ESC:
@@ -109,6 +136,10 @@ uint32_t map_evdev_key(uint16_t code) {
             return LV_KEY_LEFT;
         case KEY_RIGHT:
             return LV_KEY_RIGHT;
+        case KEY_Z:
+            return 'z';
+        case KEY_C:
+            return 'c';
         case KEY_4:
             return '4';
         case KEY_5:
@@ -135,12 +166,14 @@ bool has_nav_keys(int fd) {
         return (key_bits[code / bits_per_word] & (1UL << (code % bits_per_word))) != 0;
     };
 
-    return has_key(KEY_ESC) || has_key(KEY_LEFT) || has_key(KEY_RIGHT) || has_key(KEY_4) ||
-           has_key(KEY_5) || has_key(KEY_6) || has_key(KEY_7) || has_key(KEY_8);
+    return has_key(KEY_ESC) || has_key(KEY_LEFT) || has_key(KEY_RIGHT) || has_key(KEY_Z) ||
+           has_key(KEY_C) || has_key(KEY_4) || has_key(KEY_5) || has_key(KEY_6) ||
+           has_key(KEY_7) || has_key(KEY_8);
 }
 
 void evdev_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
     auto* keypad = static_cast<EvdevKeypad*>(lv_indev_get_driver_data(indev));
+    data->continue_reading = false;
     if (!keypad) {
         data->state = LV_INDEV_STATE_RELEASED;
         return;
@@ -159,6 +192,9 @@ void evdev_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
 
         keypad->key = key;
         keypad->state = input.value ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+        keypad->router_event_pending = true;
+        keypad->router_key = key;
+        keypad->router_pressed = keypad->state == LV_INDEV_STATE_PRESSED;
         data->continue_reading = true;
         break;
     }

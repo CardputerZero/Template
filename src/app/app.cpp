@@ -6,12 +6,17 @@
 
 #include "app.h"
 
+#include "application_config.h"
 #include "asset_manager.h"
 #include "logger.h"
 #include "linux_input.h"
 #include "screen_manager.h"
 #include "base_viewmodel.h"
 #include "theme.h"
+
+#include <cstdlib>
+#include <filesystem>
+#include <string>
 
 #if USE_DESKTOP
 #include "desktop_simulator_frame.h"
@@ -37,6 +42,10 @@
 #define APP_DRM_CONNECTOR_ID -1
 #endif
 
+#ifndef APP_CONFIG_FILE
+#define APP_CONFIG_FILE "template-app.conf"
+#endif
+
 namespace app {
 namespace {
 
@@ -44,6 +53,54 @@ void quit_requested_observer(lv_observer_t* observer, lv_subject_t* subject) {
     auto* running = static_cast<bool*>(lv_observer_get_user_data(observer));
     if (running && lv_subject_get_int(subject)) {
         *running = false;
+    }
+}
+
+struct DarkModePersistence {
+    std::string config_path;
+    bool last_dark_mode;
+};
+
+std::string writable_config_path() {
+#if USE_DESKTOP
+    return APP_CONFIG_FILE;
+#else
+    if (const char* xdg_config_home = std::getenv("XDG_CONFIG_HOME")) {
+        const std::filesystem::path root(xdg_config_home);
+        if (!root.empty() && root.is_absolute()) {
+            return (root / "template-app" / "template-app.conf").string();
+        }
+    }
+    if (const char* home = std::getenv("HOME")) {
+        const std::filesystem::path root(home);
+        if (!root.empty() && root.is_absolute()) {
+            return (root / ".config" / "template-app" / "template-app.conf").string();
+        }
+    }
+    return APP_CONFIG_FILE;
+#endif
+}
+
+void persist_dark_mode_observer(lv_observer_t* observer, lv_subject_t* subject) {
+    auto* persistence = static_cast<DarkModePersistence*>(lv_observer_get_user_data(observer));
+    if (!persistence) {
+        return;
+    }
+    const bool dark_mode = lv_subject_get_int(subject) != 0;
+    if (dark_mode == persistence->last_dark_mode) {
+        return;
+    }
+    persistence->last_dark_mode = dark_mode;
+
+    ApplicationConfig config;
+    config.dark_mode = dark_mode;
+    std::string error;
+    if (save_application_config(persistence->config_path, config, error)) {
+        LOG_INFO("saved config: {} (dark_mode={})",
+                 persistence->config_path,
+                 config.dark_mode ? "yes" : "no");
+    } else {
+        LOG_WARN("failed to save config {}: {}", persistence->config_path, error);
     }
 }
 
@@ -93,6 +150,25 @@ int Application::run() {
     }
 
     viewmodel::BaseViewModel view_model;
+    const std::string user_config_path = writable_config_path();
+    std::string loaded_config_path = APP_CONFIG_FILE;
+    if (user_config_path != APP_CONFIG_FILE) {
+        std::error_code filesystem_error;
+        if (std::filesystem::is_regular_file(user_config_path, filesystem_error)) {
+            loaded_config_path = user_config_path;
+        }
+    }
+
+    ApplicationConfig config;
+    std::string config_error;
+    if (load_application_config(loaded_config_path, config, config_error)) {
+        view_model.set_dark_mode(config.dark_mode);
+        LOG_INFO("loaded config: {} (dark_mode={})",
+                 loaded_config_path,
+                 config.dark_mode ? "yes" : "no");
+    } else {
+        LOG_WARN("failed to load config {}: {}; using defaults", loaded_config_path, config_error);
+    }
 
 #if USE_DESKTOP
     DesktopSimulatorFrame simulator_frame(assets);
@@ -114,6 +190,11 @@ int Application::run() {
     ScreenManager screen_manager(view_model, assets);
     screen_manager.start();
 
+    DarkModePersistence dark_mode_persistence{user_config_path, view_model.is_dark_mode()};
+    auto* dark_mode_observer = lv_subject_add_observer(view_model.dark_mode_subject(),
+                                                        persist_dark_mode_observer,
+                                                        &dark_mode_persistence);
+
     bool running = true;
     auto* quit_observer = lv_subject_add_observer(view_model.quit_requested_subject(),
                                                   quit_requested_observer,
@@ -132,6 +213,9 @@ int Application::run() {
 
     if (quit_observer) {
         lv_observer_remove(quit_observer);
+    }
+    if (dark_mode_observer) {
+        lv_observer_remove(dark_mode_observer);
     }
 
     return 0;

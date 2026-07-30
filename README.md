@@ -106,6 +106,7 @@ Common CMake cache options:
 | `USE_DESKTOP` | `ON` | Build SDL desktop simulator when `ON`; build embedded Linux target when `OFF`. |
 | `APP_NAME` | `template_app` | Application name used by installed asset lookup. |
 | `APP_ASSETS_ROOT` | empty | Optional runtime asset root. Expected layout includes `fonts/`, `images/`, etc. |
+| `APP_CONFIG_FILE` | platform default | Optional config path. Defaults to `config/template-app.conf` for desktop builds and `/etc/template-app.conf` for device builds. |
 | `APP_KEY_INPUT_DEVICE` | empty | Optional Linux evdev device path, e.g. `/dev/input/event0`. Empty means auto-scan `/dev/input/event*`. |
 | `APP_FRAMEBUFFER_DEVICE` | `/dev/fb0` | Linux framebuffer device used by embedded builds when `APP_USE_DRM=OFF`. |
 | `APP_USE_DRM` | `OFF` | Use LVGL's Linux DRM/KMS backend instead of fbdev for embedded builds. |
@@ -117,6 +118,19 @@ Asset lookup order:
 1. `APP_ASSETS_ROOT` when provided by CMake
 2. source-tree `assets/` for development
 3. `/usr/share/<APP_NAME>/` for installed deployments
+
+Theme startup behavior is configured in `config/template-app.conf`:
+
+```ini
+[application]
+dark_mode=yes
+```
+
+Set `dark_mode` to `yes` or `no`. The parser also accepts `true`/`false` and `1`/`0`.
+Installed device builds use `/etc/template-app.conf` as the system default. Changing the theme
+from the navigation bar (keyboard shortcut `6`) writes a per-user override to
+`$XDG_CONFIG_HOME/template-app/template-app.conf`, or `~/.config/template-app/template-app.conf`
+when `XDG_CONFIG_HOME` is not set. The per-user file takes precedence on the next launch.
 
 ## Desktop Builds
 
@@ -388,7 +402,7 @@ By default, the debian package is copied to '$HOME' folder, normally it's under 
 On your device, install the copied package with `apt` and replace the package file name with the one you copied:
 
 ```shell
-sudo apt install --no-install-recommends ./TemplateApp_0.1.0_m5stack1_arm64.deb
+sudo apt install --no-install-recommends ./TemplateApp_0.2.0_m5stack1_arm64.deb
 ```
 
 
@@ -462,7 +476,7 @@ Debian packages are produced with CPack and written to `dist/`. The package file
 Default example:
 
 ```text
-dist/TemplateApp_0.1.0_m5stack1_arm64.deb
+dist/TemplateApp_0.2.0_m5stack1_arm64.deb
 ```
 
 Package layout:
@@ -470,6 +484,7 @@ Package layout:
 | Path | Content |
 | --- | --- |
 | `/usr/bin/template_app` | Application executable. |
+| `/etc/template-app.conf` | System-default application settings, including the startup theme. |
 | `/usr/share/template_app/` | Runtime assets: fonts, images, audio. |
 | `/usr/share/APPLaunch/applications/template_app.desktop` | APPLaunch launcher entry. |
 | `/usr/share/APPLaunch/share/images/template*.png` | APPLaunch launcher icons/fallbacks. |
