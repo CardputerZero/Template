@@ -191,20 +191,68 @@ uint32_t map_evdev_key(uint16_t code) {
             return LV_KEY_LEFT;
         case KEY_RIGHT:
             return LV_KEY_RIGHT;
-        case KEY_Z:
-            return 'z';
-        case KEY_C:
-            return 'c';
-        case KEY_4:
-            return '4';
-        case KEY_5:
-            return '5';
-        case KEY_6:
-            return '6';
-        case KEY_7:
-            return '7';
-        case KEY_8:
-            return '8';
+        case KEY_UP:
+            return LV_KEY_UP;
+        case KEY_DOWN:
+            return LV_KEY_DOWN;
+
+        // Letters
+        case KEY_A: return 'a';
+        case KEY_B: return 'b';
+        case KEY_C: return 'c';
+        case KEY_D: return 'd';
+        case KEY_E: return 'e';
+        case KEY_F: return 'f';
+        case KEY_G: return 'g';
+        case KEY_H: return 'h';
+        case KEY_I: return 'i';
+        case KEY_J: return 'j';
+        case KEY_K: return 'k';
+        case KEY_L: return 'l';
+        case KEY_M: return 'm';
+        case KEY_N: return 'n';
+        case KEY_O: return 'o';
+        case KEY_P: return 'p';
+        case KEY_Q: return 'q';
+        case KEY_R: return 'r';
+        case KEY_S: return 's';
+        case KEY_T: return 't';
+        case KEY_U: return 'u';
+        case KEY_V: return 'v';
+        case KEY_W: return 'w';
+        case KEY_X: return 'x';
+        case KEY_Y: return 'y';
+        case KEY_Z: return 'z';
+
+        // Digits
+        case KEY_0: return '0';
+        case KEY_1: return '1';
+        case KEY_2: return '2';
+        case KEY_3: return '3';
+        case KEY_4: return '4';
+        case KEY_5: return '5';
+        case KEY_6: return '6';
+        case KEY_7: return '7';
+        case KEY_8: return '8';
+        case KEY_9: return '9';
+
+        // Common punctuation / editing keys on the Cardputer keyboard
+        case KEY_SPACE:      return ' ';
+        case KEY_ENTER:      return LV_KEY_ENTER;
+        case KEY_BACKSPACE:  return LV_KEY_BACKSPACE;
+        case KEY_TAB:        return LV_KEY_NEXT;
+        case KEY_COMMA:      return ',';
+        case KEY_DOT:        return '.';
+        case KEY_SLASH:      return '/';
+        case KEY_SEMICOLON:  return ';';
+        case KEY_APOSTROPHE: return '\'';
+        case KEY_MINUS:      return '-';
+        case KEY_EQUAL:      return '=';
+        case KEY_LEFTBRACE:  return '[';
+        case KEY_RIGHTBRACE: return ']';
+        case KEY_BACKSLASH:  return '\\';
+        case KEY_GRAVE:      return '`';
+
         case KEY_SYSRQ:
             return kKeyPrintScreen;
         case KEY_HELP:
