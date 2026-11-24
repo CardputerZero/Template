@@ -1,1 +1,1 @@
-/etc/template-app.conf
+/etc/@APP_CONFIG_BASENAME@.conf
