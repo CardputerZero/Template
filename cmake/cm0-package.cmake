@@ -34,8 +34,11 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/template-app.conf"
+# The in-repo name is fixed so scaffolding never has to rename it; the INSTALLED
+# name derives from the project, so two apps cannot both claim /etc/<same>.conf.
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/app.conf"
     DESTINATION "/etc"
+    RENAME "${APP_CONFIG_BASENAME}.conf"
 )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets/audio/"
