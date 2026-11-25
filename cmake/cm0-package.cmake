@@ -98,8 +98,37 @@ set(APP_DEBIAN_DEPENDS "libc6, libstdc++6, libgcc-s1, libfreetype6, libpng16-16,
 if(FMT_INCLUDE_DIR AND FMT_LIBRARY)
     string(APPEND APP_DEBIAN_DEPENDS ", libfmt10")
 endif()
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "${APP_DEBIAN_DEPENDS}")
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)
+# Generate Depends from the binary where we can, and keep the list above only
+# as the fallback.
+#
+# The hand-written list cannot track what the binary actually links. On this
+# template as it stands it already over-declares: it names libjpeg62-turbo and
+# zlib1g, which the built executable does not link. Over-declaring only pulls
+# extra packages, so it is harmless and easy not to notice -- but the same
+# mechanism under-declares the moment anyone links something new, and that
+# ships a package dpkg will happily install onto a system missing the library,
+# where it dies at the dynamic linker saying nothing useful.
+#
+# dpkg-shlibdeps reads the ELF, so it cannot drift, and it adds the minimum
+# versions a hand-written list has no way to know.
+#
+# It needs the "file" utility, and CPackDeb fails the whole package rather
+# than warning when it is absent, so this checks first and falls back to the
+# hand-written list instead of breaking builds in environments that lack it.
+find_program(APP_FILE_UTILITY file)
+if(APP_FILE_UTILITY)
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    # Left empty on purpose: merging the two produced duplicate entries, and
+    # the generated list is a superset of the useful part of the manual one.
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "")
+else()
+    message(WARNING
+        "file(1) not found: falling back to the hand-written dependency list, "
+        "which does not track what the binary links. Install the 'file' "
+        "package for generated dependencies.")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${APP_DEBIAN_DEPENDS}")
+endif()
 set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
 
 configure_file(
